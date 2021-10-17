@@ -3,7 +3,7 @@ package battleship;
 import java.util.List;
 
 public class Destroyer extends Ship {
-    public Destroyer(List<Coordinate> alivePoints) {
+    public Destroyer(Coordinate[] alivePoints) {
         super(alivePoints);
     }
 

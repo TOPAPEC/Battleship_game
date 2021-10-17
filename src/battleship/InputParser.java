@@ -56,7 +56,9 @@ public class InputParser {
     public void sequentialConsoleParse() {
         while (!parsedInput.correct) {
             tryParseConsoleInput();
-            printInputLimitsError();
+            if (!parsedInput.correct) {
+                printInputLimitsError();
+            }
         }
     }
 

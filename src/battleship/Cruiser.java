@@ -3,7 +3,7 @@ package battleship;
 import java.util.List;
 
 public class Cruiser extends Ship {
-    public Cruiser(List<Coordinate> alivePoints) {
+    public Cruiser(Coordinate[] alivePoints) {
         super(alivePoints);
     }
 
