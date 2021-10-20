@@ -3,8 +3,6 @@ package battleship;
 import java.util.Arrays;
 
 
-// Предоставить примеры готовых входных данных, которые точно должны отработать.
-// Написать в доках, почему я выбрал те или иные вероятности.
 public class Main {
     public static void main(String[] args) {
         welcomeMessage();
@@ -33,8 +31,6 @@ public class Main {
                             inputParser.parsedInput.shipNums
                     );
         } while (failedToPlaceShips);
-        game.printBoard(false);
-        game.printBoard(true);
         game.run();
         System.out.println("Thanks for playing\n" +
                 "by TOPAPEC");

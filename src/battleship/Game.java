@@ -3,6 +3,10 @@ package battleship;
 
 import java.util.Scanner;
 
+/**
+ * Class is responsible for most of the game logic (excluding
+ * initial inputs for game and board classes initialisations).
+ */
 public class Game {
     Board board;
     boolean isTorpedoModeEnabled;
@@ -14,10 +18,27 @@ public class Game {
         scanner = new Scanner(System.in);
     }
 
+    /**
+     * Creates and initialises board for the game.
+     *
+     * @param height height of the game board.
+     * @param width  width of the game board.
+     */
     public void initialiseBoard(int height, int width) {
         board = new Board(height, width);
     }
 
+    /**
+     * Filling baord with passed as a
+     * parameter number of ships of each type.
+     *
+     * @param shipNums       number of each ship type
+     *                       (carrier,battleship,cruiser,destroyer,submarine).
+     * @param suppressErrors if function should suppress filling error
+     *                       of individual iterations of filling the board.
+     * @return returns if the board was filled successful with given
+     * amount of ships.
+     */
     public boolean tryToFillBoard(int[] shipNums, boolean suppressErrors) {
         boolean isFieldFilled = board.fillField(shipNums);
         if (!isFieldFilled && !suppressErrors) {
@@ -26,6 +47,14 @@ public class Game {
         return isFieldFilled;
     }
 
+    /**
+     * Function tries to fill the board attemptsToPlaceShips times in a row.
+     *
+     * @param attemptsToPlaceShips number of sequential attempts to fill the board.
+     * @param shipNums             array with number of each type of ship
+     *                             (carrier,battleship,cruiser,destroyer,submarine).
+     * @return returns if the filling was a success.
+     */
     public boolean fillTheBoardWithMultipleAttempts(int attemptsToPlaceShips,
                                                     int[] shipNums) {
         // Incorrect!
@@ -42,12 +71,15 @@ public class Game {
         return failedToPlaceShips;
     }
 
+    /**
+     * Basically runs the whole game after board was initialised and filled.
+     */
     public void run() {
         torpedoEnablingDialog();
         recoveryModeEnablingDialog();
         boolean exitFlag = false;
         System.out.println("The game begins!");
-        while(!checkIfAllShipsAreDestroyed()) {
+        while (!checkIfAllShipsAreDestroyed()) {
             printBoard(false);
             printGameCommandList();
             if (!parseAndExecuteCommand()) {
@@ -60,18 +92,18 @@ public class Game {
 
     private boolean parseAndExecuteCommand() {
         String[] commands = scanner.nextLine().split(" ");
-        while(!parseCommand(commands)) {
+        while (!parseCommand(commands)) {
             System.out.println("Incorrect command, please try again.");
             commands = scanner.nextLine().split(" ");
         }
         if (commands[0].equals("T")) {
             int x = Integer.parseInt(commands[1]);
             int y = Integer.parseInt(commands[2]);
-            tryToTorpedoCoordinates(new Coordinate(x,y));
+            tryToTorpedoCoordinates(new Coordinate(x, y));
         } else if (commands.length == 2) {
             int x = Integer.parseInt(commands[0]);
             int y = Integer.parseInt(commands[1]);
-            tryToDamageShipAt(new Coordinate(x,y));
+            tryToDamageShipAt(new Coordinate(x, y));
         } else if (commands[0].equals("exit")) {
             return false;
         } else if (commands[0].equals("printDebug")) {
@@ -234,7 +266,7 @@ public class Game {
         return command.equals("yes") || command.equals("no");
     }
 
-    public void printFillingError() {
+    private void printFillingError() {
         System.out.println("I failed to fill the field " +
                 "with multiple attempts. Please try decreasing" +
                 " ship count or increasing field size. " +
@@ -242,14 +274,13 @@ public class Game {
     }
 
 
-    public void printBoard(boolean printDebugBoard) {
+    private void printBoard(boolean printDebugBoard) {
         board.printBoard(printDebugBoard);
     }
 
     private boolean checkIfAllShipsAreDestroyed() {
         return board.checkIfAllShipsAreDestroyed();
     }
-
 
 
 }

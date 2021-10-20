@@ -12,6 +12,12 @@ public class InputParser {
         scanner = new Scanner(System.in);
     }
 
+    /**
+     * Tries to parse command line input for game initialisation and
+     * print error message with input tips in case of failure.
+     *
+     * @param args command line args.
+     */
     public void tryParseCommandLineInput(String[] args) {
         try {
             System.out.println("Initialising with command line input");
@@ -22,6 +28,35 @@ public class InputParser {
         } catch (Exception exception) {
             printIncorrectInputError();
             parsedInput.correct = false;
+        }
+    }
+
+    /**
+     * Tries to parse console input for game initialisation and
+     * print error message with input tips in case of failure.
+     */
+    public void tryParseConsoleInput() {
+        try {
+            System.out.println("Initialising with console input:");
+            printConsoleInputTip();
+            parsedInput.correct = true;
+            parseInputString(scanner.nextLine());
+        } catch (Exception exception) {
+            printIncorrectInputError();
+            parsedInput.correct = false;
+        }
+    }
+
+    /**
+     * Asking for user input until first successful parsing is done.
+     * Prints errors on every failure.
+     */
+    public void sequentialConsoleParse() {
+        while (!parsedInput.correct) {
+            tryParseConsoleInput();
+            if (!parsedInput.correct) {
+                printInputLimitsError();
+            }
         }
     }
 
@@ -41,28 +76,7 @@ public class InputParser {
         parsedInput.width = width;
     }
 
-    public void tryParseConsoleInput() {
-        try {
-            System.out.println("Initialising with console input:");
-            printConsoleInputTip();
-            parsedInput.correct = true;
-            parseInputString(scanner.nextLine());
-        } catch (Exception exception) {
-            printIncorrectInputError();
-            parsedInput.correct = false;
-        }
-    }
-
-    public void sequentialConsoleParse() {
-        while (!parsedInput.correct) {
-            tryParseConsoleInput();
-            if (!parsedInput.correct) {
-                printInputLimitsError();
-            }
-        }
-    }
-
-    public void parseInputString(String inputString) {
+    private void parseInputString(String inputString) {
         String[] splitInput = inputString.split(" ");
         parseHeight(splitInput[0]);
         parseWidth(splitInput[1]);
@@ -87,13 +101,13 @@ public class InputParser {
         parsedInput.shipNums = shipNums;
     }
 
-    public void printConsoleInputTip() {
+    private void printConsoleInputTip() {
         System.out.println("Your input should look like:\n" +
                 "height width carrierNum,battleshipNum," +
                 "cruiserNum,destroyerNum,submarineNum");
     }
 
-    public void printInputLimitsError() {
+    private void printInputLimitsError() {
         System.out.println("""
                 Entered values do not match possible limits:
                 height and width should be within [5;30].

@@ -20,16 +20,24 @@ public class Board {
             {1, 0}, {0, -1}};
     private static final double INITIAL_PROBABILITY_FOR_10_BY_10_TABLE = 0.04;
 
+    /**
+     * @return width of the board.
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * @return height of the board.
+     */
     public int getHeight() {
         return height;
     }
 
     /**
-     * Initialises all essential parameters and places ships on the battlefield.
+     * Initialises all essential parameters and
+     * places ships on the battlefield.
+     * Marks meanings:
      * X - hit cell with a ship.
      * * - hit cell without a ship.
      * . - not fired cell.
@@ -46,22 +54,17 @@ public class Board {
         this.shipList = new ArrayList<>();
     }
 
-    private void reinitializeBoard(int height, int width) {
-        shipList.clear();
-        board = new char[height][width];
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board[0].length; ++j) {
-                board[i][j] = '.';
-            }
-        }
-        board_revealed_ships = new char[height][width];
-        for (int i = 0; i < board_revealed_ships.length; ++i) {
-            for (int j = 0; j < board_revealed_ships[0].length; ++j) {
-                board_revealed_ships[i][j] = '.';
-            }
-        }
-    }
-
+    /**
+     * Prints game board with special marks:
+     * * X - hit cell with a ship.
+     * * - hit cell without a ship.
+     * . - not fired cell.
+     * S - cell with sunk ship.
+     * E is reserved for debug board, E - enemy's ship.
+     *
+     * @param printDebugBoard if should print the board with revealed
+     *                        ships (for evaluation and debug purposes).
+     */
     public void printBoard(boolean printDebugBoard) {
         char[][] boardToPrint = board;
         if (printDebugBoard) {
@@ -82,6 +85,133 @@ public class Board {
             System.out.print(i + "\t");
         }
         System.out.println();
+    }
+
+    /**
+     * Makes one attempt to fill the field with stated
+     * numbers of each shiptype.
+     *
+     * @param shipNums numbers of each ship.
+     * @return true if the field was successfully filled, false otherwise.
+     */
+    public boolean fillField(int[] shipNums) {
+        reinitializeBoard(height, width);
+        Random rand = new Random();
+        for (int shipType = 0; shipType < shipNums.length; ++shipType) {
+            for (int shipNumber = 0; shipNumber < shipNums[shipType];
+                 ++shipNumber) {
+                boolean breakFlag = false;
+                for (int attemptToPlace = 0; attemptToPlace < 10;
+                     ++attemptToPlace) {
+                    for (int i = 0; i < board.length; ++i) {
+                        for (int j = 0; j < board[0].length; ++j) {
+                            int direction = rand.nextInt(3);
+                            if (board[i][j] == '.' &&
+                                    randomDesicionIfShouldPlace(rand) &&
+                                    checkIfCanPlaceShip(i, j,
+                                            direction, shipType)) {
+                                placeShip(i, j, direction, shipType);
+                                breakFlag = true;
+                                break;
+                            }
+                        }
+                        if (breakFlag)
+                            break;
+                    }
+                    if (breakFlag)
+                        break;
+                }
+                if (!breakFlag) {
+                    return false;
+                }
+            }
+        }
+        fillDebugBoard();
+        refillBoard();
+        return true;
+    }
+
+    /**
+     * @return current number of ships on board.
+     */
+    public int getCurrentShipNumber() {
+        return shipList.size();
+    }
+
+    /**
+     * @return true if all ships are destroyed, false otherwise.
+     */
+    public boolean checkIfAllShipsAreDestroyed() {
+        return shipList.size() == 0;
+    }
+
+    /**
+     * Imitates launch of torpedo to stated coordinates.
+     *
+     * @param coordinate coordinates to launch torpedo to.
+     * @return true if torpedo hit the ship.
+     */
+    public boolean tryToTorpedoCoordinates(Coordinate coordinate) {
+        for (Ship ship : shipList) {
+            if (ship.tryToDamage(coordinate)) {
+                ship.sunkMessage();
+                markShipAsSunk(ship);
+                shipList.remove(ship);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Imitates shot in stated coordinates.
+     * Supports recovery logic.
+     *
+     * @param coordinate            coordinate to shoot.
+     * @param isRecoveryModeEnabled if the recovery mode is enabled.
+     * @return true if the ship is hit, false otherwise.
+     */
+    public boolean tryToDamageShip(Coordinate coordinate,
+                                   boolean isRecoveryModeEnabled) {
+        for (Ship ship : shipList) {
+            if (ship.tryToDamage(coordinate)) {
+                if (isRecoveryModeEnabled && lastHitShip != null) {
+                    tryToRegenerate(ship);
+                }
+                board[coordinate.x][coordinate.y] = 'X';
+                if (ship.isShipSunk()) {
+                    ship.sunkMessage();
+                    markShipAsSunk(ship);
+                    shipList.remove(ship);
+                    lastHitShip = null;
+                } else {
+                    lastHitShip = ship;
+                }
+                return true;
+            }
+        }
+        if (isRecoveryModeEnabled && lastHitShip != null) {
+            lastHitShip.regenerate();
+            markShipAsCovered(lastHitShip);
+            lastHitShip = null;
+        }
+        return false;
+    }
+
+    private void reinitializeBoard(int height, int width) {
+        shipList.clear();
+        board = new char[height][width];
+        for (int i = 0; i < board.length; ++i) {
+            for (int j = 0; j < board[0].length; ++j) {
+                board[i][j] = '.';
+            }
+        }
+        board_revealed_ships = new char[height][width];
+        for (int i = 0; i < board_revealed_ships.length; ++i) {
+            for (int j = 0; j < board_revealed_ships[0].length; ++j) {
+                board_revealed_ships[i][j] = '.';
+            }
+        }
     }
 
     private void fillDebugBoard() {
@@ -129,47 +259,6 @@ public class Board {
         shipList.add(Ship.createShip(id, shipCoordinates));
     }
 
-    private boolean checkIfWithinTheBoard(int nx, int ny) {
-        return nx >= 0 && nx < width && ny >= 0 && ny < height;
-    }
-
-    public boolean fillField(int[] shipNums) {
-        reinitializeBoard(height, width);
-        Random rand = new Random();
-        for (int shipType = 0; shipType < shipNums.length; ++shipType) {
-            for (int shipNumber = 0; shipNumber < shipNums[shipType];
-                 ++shipNumber) {
-                boolean breakFlag = false;
-                for (int attemptToPlace = 0; attemptToPlace < 10;
-                     ++attemptToPlace) {
-                    for (int i = 0; i < board.length; ++i) {
-                        for (int j = 0; j < board[0].length; ++j) {
-                            int direction = rand.nextInt(3);
-                            if (board[i][j] == '.' &&
-                                    randomDesicionIfShouldPlace(rand) &&
-                                    checkIfCanPlaceShip(i, j,
-                                            direction, shipType)) {
-                                placeShip(i, j, direction, shipType);
-                                breakFlag = true;
-                                break;
-                            }
-                        }
-                        if (breakFlag)
-                            break;
-                    }
-                    if (breakFlag)
-                        break;
-                }
-                if (!breakFlag) {
-                    return false;
-                }
-            }
-        }
-        fillDebugBoard();
-        refillBoard();
-        return true;
-    }
-
     private void refillBoard() {
         for (int i = 0; i < board.length; ++i) {
             for (int j = 0; j < board[0].length; ++j) {
@@ -184,53 +273,12 @@ public class Board {
         return rand.nextDouble() < probability;
     }
 
-    public int getCurrentShipNumber() {
-        return shipList.size();
+    private boolean checkIfWithinTheBoard(int nx, int ny) {
+        return nx >= 0 && nx < width && ny >= 0 && ny < height;
     }
 
-    public boolean checkIfAllShipsAreDestroyed() {
-        return shipList.size() == 0;
-    }
 
-    public boolean tryToTorpedoCoordinates(Coordinate coordinate) {
-        for (Ship ship : shipList) {
-            if (ship.tryToDamage(coordinate)) {
-                ship.sunkMessage();
-                markShipAsSunk(ship);
-                shipList.remove(ship);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean tryToDamageShip(Coordinate coordinate, boolean isRecoveryModeEnabled) {
-        for (Ship ship : shipList) {
-            if (ship.tryToDamage(coordinate)) {
-                if (isRecoveryModeEnabled && lastHitShip != null) {
-                    tryToRegenerate(ship);
-                }
-                board[coordinate.x][coordinate.y] = 'X';
-                if (ship.isShipSunk()) {
-                    ship.sunkMessage();
-                    markShipAsSunk(ship);
-                    shipList.remove(ship);
-                    lastHitShip = null;
-                } else {
-                    lastHitShip = ship;
-                }
-                return true;
-            }
-        }
-        if (isRecoveryModeEnabled && lastHitShip != null) {
-            lastHitShip.regenerate();
-            markShipAsCovered(lastHitShip);
-            lastHitShip = null;
-        }
-        return false;
-    }
-
-    public void tryToRegenerate(Ship presentlyHitShip) {
+    private void tryToRegenerate(Ship presentlyHitShip) {
         if (!presentlyHitShip.equals(lastHitShip)) {
             lastHitShip.regenerate();
             markShipAsCovered(lastHitShip);

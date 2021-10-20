@@ -7,6 +7,9 @@ public class Submarine extends Ship {
         super(alivePoints);
     }
 
+    /**
+     * Prints specific sunk message for every type of ship.
+     */
     @Override
     public void sunkMessage() {
         System.out.println("You just have sunk a Submarine");
