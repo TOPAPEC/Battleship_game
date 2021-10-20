@@ -107,7 +107,7 @@ public class Board {
                         for (int j = 0; j < board[0].length; ++j) {
                             int direction = rand.nextInt(3);
                             if (board[i][j] == '.' &&
-                                    randomDesicionIfShouldPlace(rand) &&
+                                    randomDecisionIfShouldPlace(rand) &&
                                     checkIfCanPlaceShip(i, j,
                                             direction, shipType)) {
                                 placeShip(i, j, direction, shipType);
@@ -267,14 +267,14 @@ public class Board {
         }
     }
 
-    private boolean randomDesicionIfShouldPlace(Random rand) {
+    private boolean randomDecisionIfShouldPlace(Random rand) {
         double probability = INITIAL_PROBABILITY_FOR_10_BY_10_TABLE /
                 (width * height / 100.0);
         return rand.nextDouble() < probability;
     }
 
     private boolean checkIfWithinTheBoard(int nx, int ny) {
-        return nx >= 0 && nx < width && ny >= 0 && ny < height;
+        return nx >= 0 && nx < height && ny >= 0 && ny < width;
     }
 
 

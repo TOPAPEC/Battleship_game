@@ -12,10 +12,12 @@ public class Game {
     boolean isTorpedoModeEnabled;
     boolean isRecoveryModeEnabled;
     int remainingTorpedoes;
+    int shotCounter;
     Scanner scanner;
 
     public Game() {
         scanner = new Scanner(System.in);
+        shotCounter = 0;
     }
 
     /**
@@ -87,7 +89,7 @@ public class Game {
                 return;
             }
         }
-        System.out.println("You destroyed all ships! This game is over...");
+        System.out.println("You destroyed all ships with " + shotCounter + " shot attempts! This game is over...");
     }
 
     private boolean parseAndExecuteCommand() {
@@ -100,10 +102,12 @@ public class Game {
             int x = Integer.parseInt(commands[1]);
             int y = Integer.parseInt(commands[2]);
             tryToTorpedoCoordinates(new Coordinate(x, y));
+            ++shotCounter;
         } else if (commands.length == 2) {
             int x = Integer.parseInt(commands[0]);
             int y = Integer.parseInt(commands[1]);
             tryToDamageShipAt(new Coordinate(x, y));
+            ++shotCounter;
         } else if (commands[0].equals("exit")) {
             return false;
         } else if (commands[0].equals("printDebug")) {
@@ -168,6 +172,9 @@ public class Game {
     }
 
     private void printGameCommandList() {
+        if (isTorpedoModeEnabled) {
+            System.out.println("You have " + remainingTorpedoes + " torpedoes left.");
+        }
         System.out.println("" +
                 "If you enabled torpedo mode, you can enter:\n" +
                 "T x y\n" +
