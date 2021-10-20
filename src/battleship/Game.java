@@ -74,8 +74,6 @@ public class Game {
             tryToDamageShipAt(new Coordinate(x,y));
         } else if (commands[0].equals("exit")) {
             return false;
-        } else if (commands[0].equals("help")) {
-            printGameCommandList();
         } else if (commands[0].equals("printDebug")) {
             printBoard(true);
         }
@@ -120,7 +118,6 @@ public class Game {
             } else if (commands.length != 1) {
                 return false;
             } else if (!commands[0].equals("printDebug") &&
-                    !commands[0].equals("help") &&
                     !commands[0].equals("exit")) {
                 return false;
             }
@@ -147,7 +144,6 @@ public class Game {
                 "printDebug - print board with enemy ship - for " +
                 "debug and evaluation purposes only.\n" +
                 "x y - fire the x y cell\n" +
-                "help - to view this list again.\n" +
                 "exit - to exit game.\n" +
                 "Note that all x and y should be within board indexes.");
     }
@@ -202,7 +198,7 @@ public class Game {
                 "You should enter:\n" +
                 "yes numberOfTorpedoes\n" +
                 "numberOfTorpedoes is in range " +
-                "[0, numberOfShips]\n" +
+                "(0, numberOfShips]\n" +
                 "or\n" +
                 "no\n" +
                 "otherwise.");
@@ -210,7 +206,7 @@ public class Game {
 
     private void printRecoveryInputError() {
         System.out.println("Incorrect recovery mode input!\n" +
-                "You should enter:" +
+                "You should enter:\n" +
                 "yes\n" +
                 "or\n" +
                 "no\n");
@@ -225,7 +221,7 @@ public class Game {
                             commands.length == 1);
             if (isCorrect && commands[0].equals("yes")) {
                 int parsedNum = Integer.parseInt(commands[1]);
-                isCorrect = parsedNum >= 0 && parsedNum <
+                isCorrect = parsedNum > 0 && parsedNum <=
                         board.getCurrentShipNumber();
             }
         } catch (Exception exception) {

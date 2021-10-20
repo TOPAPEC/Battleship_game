@@ -34,8 +34,10 @@ public class Ship {
     public boolean tryToDamage(Coordinate coordinate) {
         for (int i = 0; i < shipPoints.length; ++i) {
             if (shipPoints[i].equals(coordinate)) {
+                if (!isPointSunk[i]) {
+                    --remainingPoints;
+                }
                 isPointSunk[i] = true;
-                --remainingPoints;
                 return true;
             }
         }

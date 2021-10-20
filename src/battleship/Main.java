@@ -49,22 +49,9 @@ public class Main {
         System.out.println("Welcome! Fullscreen is recommended.");
     }
 
-    public static ParsedInput parseInputString(String inputString) {
-        String[] splitInput = inputString.split(" ");
-        int height = Integer.parseInt(splitInput[0]);
-        int width = Integer.parseInt(splitInput[1]);
-        int[] shipNums = parseShipNumsString(splitInput[2]);
-        return new ParsedInput(height, width, shipNums);
-    }
-
     private static int[] parseShipNumsString(String s) {
         return Arrays.stream(s.split(","))
                 .mapToInt(Integer::parseInt).toArray();
     }
 
-    public static void printConsoleInputTip() {
-        System.out.println("Your input should look like:\n" +
-                "height width carrierNum,battleshipNum,cruiserNum," +
-                "destroyerNum,submarineNum");
-    }
 }
